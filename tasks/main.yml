@@ -1,0 +1,54 @@
+---
+
+- name: Install samba packages
+  tags: samba
+  apt:
+    name: "{{ packages }}"
+  vars:
+   packages:
+     - samba
+     - smbclient
+
+- name: Deploy config for samba
+  template:
+    src: "{{ item }}"
+    dest: "/etc/samba/{{ item }}"
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"
+  notify: restart smbd
+  with_items:
+   - smb.conf
+
+- name: Enable smbd
+  systemd:
+    name: smbd
+    daemon_reload: yes
+    enabled: yes
+    masked: no
+
+- name: Added user for iso mount
+  user:
+    name: iso
+    group: iso
+    system: yes
+    shell: /sbin/nologin
+    comment: User to mount virtual iso via smb
+
+- name: Create Samba directory
+  file:
+    path: /srv/samba
+    state: directory
+    recurse: yes
+
+- name: Create iso directory
+  file:
+    path: /srv/samba/iso
+    state: directory
+    group: iso
+    mode: "2770"
+
+- name: Do not forget to create a Samba password for user "iso"
+  debug:
+   msg: "On host {{ inventory_hostname }} run: smbpasswd -a iso"
+
