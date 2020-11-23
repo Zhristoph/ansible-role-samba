@@ -1,0 +1,8 @@
+all:
+  hosts:
+  children:
+    samba:
+      hosts:
+        samba01:
+        samba02:
+        samba03:

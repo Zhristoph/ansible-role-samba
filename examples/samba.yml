@@ -1,0 +1,7 @@
+- name: Samba
+  hosts: samba
+  become: yes
+  gather_facts: no
+  roles:
+    - samba
+
